@@ -121,9 +121,9 @@ php_decimal_t *php_decimal_create_copy(const php_decimal_t *src)
 /**
  * Clones the given zval, which must be a decimal object.
  */
-static zend_object *php_decimal_clone_obj(zval *obj)
+static zend_object *php_decimal_clone_obj(zend_object *obj)
 {
-    return (zend_object *) php_decimal_create_copy(Z_DECIMAL_P(obj));
+    return (zend_object *) php_decimal_create_copy((php_decimal_t *) obj);
 }
 
 /**
@@ -212,96 +212,6 @@ failure:
 /*                               SERIALIZATION                                */
 /******************************************************************************/
 
-/**
- * Serialize
- */
-static php_decimal_success_t php_decimal_serialize(zval *object, unsigned char **buffer, size_t *length, zend_serialize_data *data)
-{
-    zval tmp;
-    smart_str buf = {0};
-    php_decimal_t *obj = Z_DECIMAL_P(object);
-
-    php_serialize_data_t serialize_data = (php_serialize_data_t) data;
-    PHP_VAR_SERIALIZE_INIT(serialize_data);
-
-    /* Serialize the internal value as a string. */
-    ZVAL_STR(&tmp, php_decimal_mpd_to_serialized(PHP_DECIMAL_MPD(obj)));
-    php_var_serialize(&buf, &tmp, &serialize_data);
-    zval_ptr_dtor(&tmp);
-
-    /* Serialize the precision as an integer. */
-    ZVAL_LONG(&tmp, php_decimal_get_prec(obj));
-    php_var_serialize(&buf, &tmp, &serialize_data);
-
-    PHP_VAR_SERIALIZE_DESTROY(serialize_data);
-
-    *buffer = (unsigned char *) estrndup(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
-    *length = ZSTR_LEN(buf.s);
-
-    smart_str_free(&buf);
-
-    return SUCCESS;
-}
-
-/**
- * Unserialize
- */
-static php_decimal_success_t php_decimal_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buffer, size_t length, zend_unserialize_data *data)
-{
-    zval *value;
-    zval *prec;
-
-    php_decimal_t *res = php_decimal();
-
-    ZVAL_DECIMAL(object, res);
-
-    php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
-
-    const unsigned char *pos = buffer;
-    const unsigned char *end = buffer + length;
-
-    PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
-
-    /* Unserialize internal decimal value, which was serialized as a string. */
-    value = var_tmp_var(&unserialize_data);
-    if (!php_var_unserialize(value, &pos, end, &unserialize_data) || Z_TYPE_P(value) != IS_STRING) {
-        goto error;
-    }
-
-    /* Unserialize precision, which was serialized as an integer. */
-    prec = var_tmp_var(&unserialize_data);
-    if (!php_var_unserialize(prec, &pos, end, &unserialize_data) || Z_TYPE_P(prec) != IS_LONG) {
-        goto error;
-    }
-
-    /* Check that we've parsed the entire serialized string. */
-    if (pos != end) {
-        goto error;
-    }
-
-    /* Check precision is valid. */
-    if (!php_decimal_validate_prec(Z_LVAL_P(prec))) {
-        goto error;
-    }
-
-    /* Set the precision. */
-    php_decimal_set_prec(res, Z_LVAL_P(prec));
-
-    /* Attempt to parse the unserialized string, quietly, delegate to local error. */
-    if (php_decimal_mpd_set_string(PHP_DECIMAL_MPD(res), Z_STR_P(value)) == FAILURE) {
-        goto error;
-    }
-
-    /* Success! */
-    PHP_VAR_UNSERIALIZE_DESTROY(unserialize_data);
-    return SUCCESS;
-
-error:
-    zval_ptr_dtor(object);
-    php_decimal_unserialize_error();
-    return FAILURE;
-}
-
 
 /******************************************************************************/
 /*                              OBJECT HANDLERS                               */
@@ -311,7 +221,7 @@ error:
  * Compares two zval's, one of which must be a decimal. This is the function
  * used by the compare handler, as well as compareTo.
  */
-static php_decimal_success_t php_decimal_compare_handler(zval *res, zval *op1, zval *op2)
+static int php_decimal_compare_handler(zval *op1, zval *op2)
 {
     int result;
     int invert;
@@ -324,31 +234,34 @@ static php_decimal_success_t php_decimal_compare_handler(zval *res, zval *op1, z
         invert = 1;
     }
 
-    /* */
     if (UNEXPECTED(result == PHP_DECIMAL_COMPARISON_UNDEFINED)) {
-        ZVAL_LONG(res, 1);
-    } else {
-        ZVAL_LONG(res, invert ? -result : result);
+        return ZEND_UNCOMPARABLE;
     }
 
-    return SUCCESS;
+    return invert ? -result : result;
 }
 
 /**
  * var_dump, print_r etc.
  */
-static HashTable *php_decimal_get_debug_info_handler(zval *obj, int *is_temp)
+static HashTable *php_decimal_get_debug_info_handler(zend_object *obj, int *is_temp)
 {
     zval tmp;
     HashTable *debug_info;
+    php_decimal_t *dec = (php_decimal_t *) obj;
 
     ALLOC_HASHTABLE(debug_info);
     zend_hash_init(debug_info, 2, NULL, ZVAL_PTR_DTOR, 0);
 
-    ZVAL_STR(&tmp, php_decimal_mpd_to_string(Z_MPD_P(obj)));
+    if (UNEXPECTED(!PHP_DECIMAL_OBJ_IS_INITIALIZED(dec))) {
+        *is_temp = 1;
+        return debug_info;
+    }
+
+    ZVAL_STR(&tmp, php_decimal_mpd_to_string(PHP_DECIMAL_MPD(dec)));
     zend_hash_str_update(debug_info, "value", sizeof("value") - 1, &tmp);
 
-    ZVAL_LONG(&tmp, php_decimal_get_prec(Z_DECIMAL_P(obj)));
+    ZVAL_LONG(&tmp, php_decimal_get_prec(dec));
     zend_hash_str_update(debug_info, "precision", sizeof("precision") - 1, &tmp);
 
     *is_temp = 1;
@@ -359,19 +272,19 @@ static HashTable *php_decimal_get_debug_info_handler(zval *obj, int *is_temp)
 /**
  * Cast to string, int, float or bool.
  */
-static php_decimal_success_t php_decimal_cast_object_handler(zval *obj, zval *result, int type)
+static php_decimal_success_t php_decimal_cast_object_handler(zend_object *obj, zval *result, int type)
 {
     switch (type) {
         case IS_STRING:
-            ZVAL_STR(result, php_decimal_mpd_to_string(Z_MPD_P(obj)));
+            ZVAL_STR(result, php_decimal_mpd_to_string(PHP_DECIMAL_MPD((php_decimal_t *) obj)));
             return SUCCESS;
 
         case IS_LONG:
-            ZVAL_LONG(result, php_decimal_mpd_to_long(Z_MPD_P(obj)));
+            ZVAL_LONG(result, php_decimal_mpd_to_long(PHP_DECIMAL_MPD((php_decimal_t *) obj)));
             return SUCCESS;
 
         case IS_DOUBLE:
-            ZVAL_DOUBLE(result, php_decimal_mpd_to_double(Z_MPD_P(obj)));
+            ZVAL_DOUBLE(result, php_decimal_mpd_to_double(PHP_DECIMAL_MPD((php_decimal_t *) obj)));
             return SUCCESS;
 
         case _IS_BOOL:
@@ -433,7 +346,7 @@ static php_decimal_success_t php_decimal_do_operation_handler(zend_uchar opcode,
     }
 
     if (op1 == &op1_copy) {
-        zval_dtor(op1);
+        zval_ptr_dtor(op1);
     }
 
     return SUCCESS;
@@ -510,7 +423,7 @@ PHP_DECIMAL_METHOD(Decimal, valueOf)
     PHP_DECIMAL_PARSE_PARAMS(1, 2)
         Z_PARAM_ZVAL(val)
         Z_PARAM_OPTIONAL
-        Z_PARAM_STRICT_LONG(prec)
+        Z_PARAM_LONG(prec)
     PHP_DECIMAL_PARSE_PARAMS_END()
 
     if (ZEND_NUM_ARGS() == 1) {
@@ -663,8 +576,8 @@ PHP_DECIMAL_METHOD(Decimal, round)
 
     PHP_DECIMAL_PARSE_PARAMS(0, 2)
         Z_PARAM_OPTIONAL
-        Z_PARAM_STRICT_LONG(places)
-        Z_PARAM_STRICT_LONG(mode)
+        Z_PARAM_LONG(places)
+        Z_PARAM_LONG(mode)
     PHP_DECIMAL_PARSE_PARAMS_END()
     {
         php_decimal_t *obj = THIS_DECIMAL();
@@ -912,9 +825,9 @@ PHP_DECIMAL_METHOD(Decimal, toFixed)
 
     PHP_DECIMAL_PARSE_PARAMS(0, 3)
         Z_PARAM_OPTIONAL
-        Z_PARAM_STRICT_LONG(places)
+        Z_PARAM_LONG(places)
         Z_PARAM_BOOL(commas)
-        Z_PARAM_STRICT_LONG(mode)
+        Z_PARAM_LONG(mode)
     PHP_DECIMAL_PARSE_PARAMS_END()
 
     RETURN_STR(php_decimal_mpd_to_fixed(THIS_DECIMAL_MPD(), places, commas, mode));
@@ -978,7 +891,7 @@ PHP_DECIMAL_METHOD(Decimal, toDecimal)
     zend_long prec;
 
     PHP_DECIMAL_PARSE_PARAMS(1, 1)
-        Z_PARAM_STRICT_LONG(prec)
+        Z_PARAM_LONG(prec)
     PHP_DECIMAL_PARSE_PARAMS_END()
 
     if (php_decimal_validate_prec(prec)) {
@@ -1023,7 +936,7 @@ PHP_DECIMAL_METHOD(Decimal, compareTo)
         Z_PARAM_ZVAL(op2)
     PHP_DECIMAL_PARSE_PARAMS_END()
 
-    php_decimal_compare_handler(return_value, getThis(), op2);
+    ZVAL_LONG(return_value, php_decimal_compare_handler(getThis(), op2));
 }
 
 /**
@@ -1067,6 +980,60 @@ PHP_DECIMAL_METHOD(Decimal, equals)
 
     ZVAL_BOOL(return_value, php_decimal_compare(THIS_DECIMAL(), other) == 0);
     zval_ptr_dtor(other);
+}
+
+/**
+ * Decimal::__serialize
+ */
+PHP_DECIMAL_ARGINFO_RETURN_TYPE(Decimal, __serialize, IS_ARRAY, 0)
+PHP_DECIMAL_ARGINFO_END()
+PHP_DECIMAL_METHOD(Decimal, __serialize)
+{
+    php_decimal_t *obj = THIS_DECIMAL();
+    PHP_DECIMAL_PARSE_PARAMS_NONE();
+
+    array_init_size(return_value, 2);
+    add_assoc_str(return_value, "value", php_decimal_mpd_to_serialized(PHP_DECIMAL_MPD(obj)));
+    add_assoc_long(return_value, "precision", php_decimal_get_prec(obj));
+}
+
+/**
+ * Decimal::__unserialize
+ */
+PHP_DECIMAL_ARGINFO(Decimal, __unserialize, 1)
+PHP_DECIMAL_ARGINFO_ZVAL(data)
+PHP_DECIMAL_ARGINFO_END()
+PHP_DECIMAL_METHOD(Decimal, __unserialize)
+{
+    HashTable *data;
+    zval *value, *prec;
+    php_decimal_t *obj = THIS_DECIMAL();
+
+    PHP_DECIMAL_PARSE_PARAMS(1, 1)
+        Z_PARAM_ARRAY_HT(data)
+    PHP_DECIMAL_PARSE_PARAMS_END()
+
+    value = zend_hash_str_find(data, "value", sizeof("value") - 1);
+    prec = zend_hash_str_find(data, "precision", sizeof("precision") - 1);
+
+    if (!value || Z_TYPE_P(value) != IS_STRING || !prec || Z_TYPE_P(prec) != IS_LONG) {
+        php_decimal_unserialize_error();
+        return;
+    }
+
+    if (!php_decimal_validate_prec(Z_LVAL_P(prec))) {
+        return;
+    }
+
+    if (!PHP_DECIMAL_OBJ_IS_INITIALIZED(obj)) {
+        php_decimal_init_mpd(PHP_DECIMAL_MPD(obj));
+    }
+
+    php_decimal_set_prec(obj, Z_LVAL_P(prec));
+
+    if (php_decimal_mpd_set_string(PHP_DECIMAL_MPD(obj), Z_STR_P(value)) == FAILURE) {
+        php_decimal_unserialize_error();
+    }
 }
 
 /******************************************************************************/
@@ -1130,6 +1097,9 @@ static zend_function_entry decimal_methods[] = {
     PHP_DECIMAL_ME(Decimal, compareTo)
     PHP_DECIMAL_ME(Decimal, between)
     PHP_DECIMAL_ME(Decimal, equals)
+
+    PHP_DECIMAL_ME(Decimal, __serialize)
+    PHP_DECIMAL_ME(Decimal, __unserialize)
     PHP_FE_END
 };
 
@@ -1151,8 +1121,6 @@ void php_decimal_register_decimal_class()
      *
      */
     php_decimal_decimal_ce->create_object = php_decimal_create_object;
-    php_decimal_decimal_ce->serialize     = php_decimal_serialize;
-    php_decimal_decimal_ce->unserialize   = php_decimal_unserialize;
 
     /**
      *

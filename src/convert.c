@@ -106,7 +106,7 @@ zend_bool php_decimal_number_is_integer(const zval *obj)
     }
 
     /* Check if equal to truncated self. */
-    zend_call_method_with_0_params((zval *) obj, Z_OBJCE_P(obj), NULL, "trunc", &trunc);
+    zend_call_method_with_0_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "trunc", &trunc);
     result = php_decimal_number_compare(obj, &trunc) == 0;
     
     zval_ptr_dtor(&trunc);
@@ -530,7 +530,7 @@ double php_decimal_number_to_double(const zval *obj)
     double dval;
 
     zval tmp;
-    zend_call_method_with_0_params((zval *) obj, Z_OBJCE_P(obj), NULL, "tofloat", &tmp);
+    zend_call_method_with_0_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "tofloat", &tmp);
     dval = Z_DVAL(tmp);
 
     zval_ptr_dtor(&tmp);
@@ -542,7 +542,7 @@ zend_long php_decimal_number_to_long(const zval *obj)
     zend_long lval;
 
     zval tmp;
-    zend_call_method_with_0_params((zval *) obj, Z_OBJCE_P(obj), NULL, "toint", &tmp);
+    zend_call_method_with_0_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "toint", &tmp);
     lval = Z_LVAL(tmp);
 
     zval_ptr_dtor(&tmp);
@@ -551,7 +551,7 @@ zend_long php_decimal_number_to_long(const zval *obj)
 
 void php_decimal_number_to_string(zval *result, const zval *obj)
 {
-    zend_call_method_with_0_params((zval *) obj, Z_OBJCE_P(obj), NULL, "tostring", result);
+    zend_call_method_with_0_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "tostring", result);
 }
 
 void php_decimal_number_to_mpd(mpd_t *mpd, const zval *obj, const zend_long prec)
@@ -562,7 +562,7 @@ void php_decimal_number_to_mpd(mpd_t *mpd, const zval *obj, const zend_long prec
     uint32_t status = 0;
     
     ZVAL_LONG(&zprec, prec);
-    zend_call_method_with_1_params((zval *) obj, Z_OBJCE_P(obj), NULL, "todecimal", &result, &zprec);
+    zend_call_method_with_1_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "todecimal", &result, &zprec);
     mpd_qcopy(mpd, Z_MPD_P(&result), &status);
 
     assert(status == 0);
@@ -576,7 +576,7 @@ void php_decimal_number_to_num_den(mpd_t *num, mpd_t *den, const zval *obj)
     
     uint32_t status = 0;
     
-    zend_call_method_with_0_params((zval *) obj, Z_OBJCE_P(obj), NULL, "torational", &result);
+    zend_call_method_with_0_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "torational", &result);
     
     mpd_qcopy(num, PHP_RATIONAL_NUM(Z_RATIONAL_P(&result)), &status);
     mpd_qcopy(den, PHP_RATIONAL_DEN(Z_RATIONAL_P(&result)), &status);

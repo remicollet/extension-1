@@ -52,7 +52,7 @@ static php_decimal_success_t php_decimal_parse_number_to_decimal(zval *result, c
 {
     zval _prec;
     ZVAL_LONG(&_prec, prec);
-    zend_call_method_with_1_params((zval *) val, Z_OBJCE_P(val), NULL, "todecimal", result, &_prec);
+    zend_call_method_with_1_params(Z_OBJ_P(val), Z_OBJCE_P(val), NULL, "todecimal", result, &_prec);
 
     return EG(exception) ? FAILURE : SUCCESS;
 }
@@ -62,7 +62,7 @@ static php_decimal_success_t php_decimal_parse_number_to_decimal(zval *result, c
  */
 static php_decimal_success_t php_decimal_parse_number_to_rational(zval *result, const zval *val)
 {
-    zend_call_method_with_0_params((zval *) val, Z_OBJCE_P(val), NULL, "torational", result);
+    zend_call_method_with_0_params(Z_OBJ_P(val), Z_OBJCE_P(val), NULL, "torational", result);
 
     return EG(exception) ? FAILURE : SUCCESS;
 }

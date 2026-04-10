@@ -51,19 +51,22 @@ static zend_object_handlers php_decimal_number_handlers;
 /**
  * Cast to string, int, float or bool.
  */
-static php_decimal_success_t php_decimal_number_cast_object(zval *obj, zval *result, int type)
+static php_decimal_success_t php_decimal_number_cast_object(zend_object *obj, zval *result, int type)
 {
+    zval zobj;
+    ZVAL_OBJ(&zobj, obj);
+
     switch (type) {
         case IS_STRING:
-            php_decimal_number_to_string(result, obj);
+            php_decimal_number_to_string(result, &zobj);
             return SUCCESS;
 
         case IS_LONG:
-            ZVAL_LONG(result, php_decimal_number_to_long(obj));
+            ZVAL_LONG(result, php_decimal_number_to_long(&zobj));
             return SUCCESS;
 
         case IS_DOUBLE:
-            ZVAL_DOUBLE(result, php_decimal_number_to_double(obj));
+            ZVAL_DOUBLE(result, php_decimal_number_to_double(&zobj));
             return SUCCESS;
 
         case _IS_BOOL:
@@ -116,7 +119,7 @@ static php_decimal_success_t php_decimal_number_do_operation(zend_uchar opcode, 
 
     /* Attempt operation. */
     if (Z_IS_DECIMAL_NUMBER_P(op1)) {
-        zend_call_method(op1, Z_OBJCE_P(op1), NULL, func, strlen(func), result, 1, op2, NULL);
+        zend_call_method(Z_OBJ_P(op1), Z_OBJCE_P(op1), NULL, func, strlen(func), result, 1, op2, NULL);
 
         /* Check that nothing went wrong. */
         if (UNEXPECTED(EG(exception))) {
@@ -136,7 +139,7 @@ static php_decimal_success_t php_decimal_number_do_operation(zend_uchar opcode, 
         }
 
         /* */
-        zend_call_method(&tmp, Z_OBJCE_P(&tmp), NULL, func, strlen(func), result, 1, op2, NULL);
+        zend_call_method(Z_OBJ(tmp), Z_OBJCE(tmp), NULL, func, strlen(func), result, 1, op2, NULL);
         zval_ptr_dtor(&tmp);
 
         /* */
@@ -147,7 +150,7 @@ static php_decimal_success_t php_decimal_number_do_operation(zend_uchar opcode, 
     }
 
     if (op1 == &op1_copy) {
-        zval_dtor(op1);
+        zval_ptr_dtor(op1);
     }
 
     return SUCCESS;
@@ -157,7 +160,7 @@ static php_decimal_success_t php_decimal_number_do_operation(zend_uchar opcode, 
  * Compares two zval's, one of which must be a decimal. This is the function
  * used by the compare handler, as well as compareTo.
  */
-static php_decimal_success_t php_decimal_number_compare_handler(zval *res, zval *op1, zval *op2)
+static int php_decimal_number_compare_handler(zval *op1, zval *op2)
 {
     int result;
     int invert;
@@ -170,14 +173,11 @@ static php_decimal_success_t php_decimal_number_compare_handler(zval *res, zval 
         invert = 1;
     }
 
-    /* */
     if (UNEXPECTED(result == PHP_DECIMAL_COMPARISON_UNDEFINED)) {
-        ZVAL_LONG(res, 1);
-    } else {
-        ZVAL_LONG(res, invert ? -result : result);
+        return ZEND_UNCOMPARABLE;
     }
 
-    return SUCCESS;
+    return invert ? -result : result;
 }
 
 
@@ -277,7 +277,7 @@ PHP_DECIMAL_METHOD(Number, floor)
     ZVAL_LONG(&places, 0);
     ZVAL_LONG(&mode, PHP_DECIMAL_ROUND_FLOOR);
 
-    zend_call_method_with_2_params(obj, Z_OBJCE_P(obj), NULL, "round", return_value, &places, &mode);
+    zend_call_method_with_2_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "round", return_value, &places, &mode);
 }
 
 /**
@@ -291,13 +291,13 @@ PHP_DECIMAL_METHOD(Number, ceil)
     zval mode;
 
     zval *obj = getThis();
-    
+
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    
+
     ZVAL_LONG(&places, 0);
     ZVAL_LONG(&mode, PHP_DECIMAL_ROUND_CEILING);
- 
-    zend_call_method_with_2_params(obj, Z_OBJCE_P(obj), NULL, "round", return_value, &places, &mode);
+
+    zend_call_method_with_2_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "round", return_value, &places, &mode);
 }
 
 /**
@@ -311,13 +311,13 @@ PHP_DECIMAL_METHOD(Number, trunc)
     zval mode;
 
     zval *obj = getThis();
-    
+
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    
+
     ZVAL_LONG(&places, 0);
     ZVAL_LONG(&mode, PHP_DECIMAL_ROUND_TRUNCATE);
- 
-    zend_call_method_with_2_params(obj, Z_OBJCE_P(obj), NULL, "round", return_value, &places, &mode);
+
+    zend_call_method_with_2_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "round", return_value, &places, &mode);
 }
 
 /**
@@ -333,7 +333,7 @@ PHP_DECIMAL_METHOD(Number, abs)
 
     /* */
     if (php_decimal_number_is_negative(obj)) {
-        zend_call_method_with_0_params(obj, Z_OBJCE_P(obj), NULL, "negate", return_value);
+        zend_call_method_with_0_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "negate", return_value);
     } else {
         ZVAL_COPY(return_value, obj);
     }
@@ -353,7 +353,7 @@ PHP_DECIMAL_METHOD(Number, negate)
     PHP_DECIMAL_PARSE_PARAMS_NONE();
 
     ZVAL_LONG(&negative_one, -1);
-    zend_call_method_with_1_params(obj, Z_OBJCE_P(obj), NULL, "mul", return_value, &negative_one);
+    zend_call_method_with_1_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "mul", return_value, &negative_one);
 }
 
 /**
@@ -503,7 +503,7 @@ PHP_DECIMAL_METHOD(Number, toDecimal)
     zend_long prec;
 
     PHP_DECIMAL_PARSE_PARAMS(1, 1)
-        Z_PARAM_STRICT_LONG(prec)
+        Z_PARAM_LONG(prec)
     PHP_DECIMAL_PARSE_PARAMS_END()
     {
         if (EXPECTED(php_decimal_validate_prec(prec))) {
@@ -588,7 +588,7 @@ PHP_DECIMAL_ARGINFO_END()
 PHP_DECIMAL_METHOD(Number, __toString)
 {
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    zend_call_method_with_0_params(getThis(), Z_OBJCE_P(getThis()), NULL, "tostring", return_value);
+    zend_call_method_with_0_params(Z_OBJ_P(getThis()), Z_OBJCE_P(getThis()), NULL, "tostring", return_value);
 }
 
 /**
@@ -599,7 +599,7 @@ PHP_DECIMAL_ARGINFO_END()
 PHP_DECIMAL_METHOD(Number, jsonSerialize)
 {
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    zend_call_method_with_0_params(getThis(), Z_OBJCE_P(getThis()), NULL, "tostring", return_value);
+    zend_call_method_with_0_params(Z_OBJ_P(getThis()), Z_OBJCE_P(getThis()), NULL, "tostring", return_value);
 }
 
 /******************************************************************************/

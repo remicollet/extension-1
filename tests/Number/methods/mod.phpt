@@ -44,23 +44,33 @@ print_r(Rational::valueOf(9) % Number::valueOf("6.5"));
 print_r(Rational::valueOf(9)->mod(Number::valueOf("6.5")));
 
 ?>
---EXPECT--
+--EXPECTF--
 Number::mod
+
+Deprecated: Implicit conversion from float-string "6.5" to int loses precision in %s on line %d
 Number Object
 (
     [value:protected] => 3
 )
+
+Deprecated: Implicit conversion from float-string "6.5" to int loses precision in %s on line %d
 Number::mod
+
+Deprecated: Implicit conversion from float-string "6.5" to int loses precision in %s on line %d
 Number Object
 (
     [value:protected] => 6
 )
 Number::mod
+
+Deprecated: Implicit conversion from float-string "6.5" to int loses precision in %s on line %d
 Number Object
 (
     [value:protected] => 3
 )
 Number::mod
+
+Deprecated: Implicit conversion from float-string "6.5" to int loses precision in %s on line %d
 Number Object
 (
     [value:protected] => 3

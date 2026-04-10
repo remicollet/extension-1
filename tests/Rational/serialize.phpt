@@ -14,7 +14,7 @@ var_dump(unserialize('C:16:"Decimal\Rational":26:{s:13:"abc0000000000";i:42;}'))
 
 ?>
 --EXPECTF--
-string(53) "C:16:"Decimal\Rational":24:{s:6:"1.2E+1";s:4:"5E+0";}"
+string(72) "O:16:"Decimal\Rational":2:{s:3:"num";s:6:"1.2E+1";s:3:"den";s:4:"5E+0";}"
 object(Decimal\Rational)#%d (2) {
   ["num"]=>
   string(2) "12"
@@ -22,8 +22,6 @@ object(Decimal\Rational)#%d (2) {
   string(1) "5"
 }
 
-Fatal error: Uncaught RuntimeException: Failed to unserialize decimal number string in %s
-Stack trace:
-#0 %s: unserialize('C:16:"Decimal\\R...')
-#1 {main}
-  thrown in %s on line %d
+Warning: Class Decimal\Rational has no unserializer in %s on line %d
+object(Decimal\Rational)#%d (0) {
+}

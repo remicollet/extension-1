@@ -108,5 +108,5 @@ A Failed to parse string as decimal: " 1"
 B Failed to parse string as decimal: "1 "
 C Decimal\Rational::valueOf() expected parameter 1 to be a decimal number, string, or integer
 D Decimal\Rational::valueOf() expected parameter 1 to be a decimal number, string, or integer
-E Call to private method Decimal\Rational::__construct() from context ''
-F Decimal\Rational::valueOf() expects exactly 1 parameter, 0 given
+E Call to private method Decimal\Rational::__construct() from global scope
+F Decimal\Rational::valueOf() expects exactly 1 argument, 0 given

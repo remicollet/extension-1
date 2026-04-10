@@ -258,7 +258,7 @@ static int php_decimal_compare_invoke(const zval *obj, const zval *op2)
     }
 
     /* */
-    zend_call_method_with_1_params((zval *) obj, Z_OBJCE_P(obj), NULL, "compareto", &cmp, (zval *) op2);
+    zend_call_method_with_1_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "compareto", &cmp, (zval *) op2);
     
     /* */
     if (UNEXPECTED(EG(exception))) {

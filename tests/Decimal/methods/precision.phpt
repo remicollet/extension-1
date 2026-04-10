@@ -19,5 +19,5 @@ int(34)
 int(34)
 int(5)
 
-Notice: Undefined variable: x in %s on line %d
+Warning: Undefined variable $x in %s on line %d
 NULL

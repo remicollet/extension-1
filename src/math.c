@@ -250,6 +250,11 @@ void php_decimal_floor(mpd_t *res, const mpd_t *op1, zend_long prec)
 {
     uint32_t status = 0;
 
+    if (UNEXPECTED(mpd_isspecial(op1))) {
+        mpd_qcopy(res, op1, &status);
+        return;
+    }
+
     mpd_qfloor(res, op1, MAX_CONTEXT, &status);
 }
 
@@ -259,6 +264,11 @@ void php_decimal_floor(mpd_t *res, const mpd_t *op1, zend_long prec)
 void php_decimal_ceil(mpd_t *res, const mpd_t *op1, zend_long prec)
 {
     uint32_t status = 0;
+
+    if (UNEXPECTED(mpd_isspecial(op1))) {
+        mpd_qcopy(res, op1, &status);
+        return;
+    }
 
     mpd_qceil(res, op1, MAX_CONTEXT, &status);
 }
@@ -271,6 +281,11 @@ void php_decimal_ceil(mpd_t *res, const mpd_t *op1, zend_long prec)
 void php_decimal_trunc(mpd_t *res, const mpd_t *op1, zend_long prec)
 {
     uint32_t status = 0;
+
+    if (UNEXPECTED(mpd_isspecial(op1))) {
+        mpd_qcopy(res, op1, &status);
+        return;
+    }
 
     mpd_qtrunc(res, op1, MAX_CONTEXT, &status);
 }
@@ -844,10 +859,10 @@ int php_decimal_number_parity(const zval *obj)
     ZVAL_LONG(&two, 2);
 
     /* */
-    zend_call_method_with_1_params((zval *) obj, Z_OBJCE_P(obj), NULL, "mod", &tmp, &two);
+    zend_call_method_with_1_params(Z_OBJ_P(obj), Z_OBJCE_P(obj), NULL, "mod", &tmp, &two);
 
     /* TODO check exceptions? */
-    zend_call_method_with_0_params(&tmp, Z_OBJCE_P(&tmp), NULL, "iszero", &res);
+    zend_call_method_with_0_params(Z_OBJ(tmp), Z_OBJCE(tmp), NULL, "iszero", &res);
 
     /* */
     parity = Z_TYPE_P(&res) == IS_TRUE ? 0 : 1;

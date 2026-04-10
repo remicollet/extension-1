@@ -67,4 +67,4 @@ Decimal\Decimal Object
 )
 OutOfRangeException: Decimal precision out of range
 OutOfRangeException: Decimal precision out of range
-ArgumentCountError: Decimal\Rational::toDecimal() expects exactly 1 parameter, 0 given
+ArgumentCountError: Decimal\Rational::toDecimal() expects exactly 1 argument, 0 given

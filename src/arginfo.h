@@ -39,73 +39,17 @@
 #define PHP_DECIMAL_ARGINFO(cls, name, required_num_args) \
     ZEND_BEGIN_ARG_INFO_EX(PHP_DECIMAL_ARGINFO_NAME(cls, name), 0, 0, required_num_args)
 
-#if PHP_VERSION_ID >= 70200
 #define PHP_DECIMAL_ARGINFO_RETURN_NUMBER(cls, name, required_num_args) \
-    static const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE_CLASS_CONST(PHP_DECIMAL_NUMBER_FQCN, 0), 0, 0},
-#else
-#define PHP_DECIMAL_ARGINFO_RETURN_NUMBER(cls, name, required_num_args) \
-    static const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), PHP_DECIMAL_NUMBER_FQCN, IS_OBJECT, 0, 0, 0},
-#endif
+    ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(PHP_DECIMAL_ARGINFO_NAME(cls, name), 0, required_num_args, Decimal\\Number, 0)
 
-#if PHP_VERSION_ID >= 70200
 #define PHP_DECIMAL_ARGINFO_RETURN_DECIMAL(cls, name, required_num_args) \
-    const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE_CLASS_CONST(PHP_DECIMAL_DECIMAL_FQCN, 0), 0, 0},
-#else
-#define PHP_DECIMAL_ARGINFO_RETURN_DECIMAL(cls, name, required_num_args) \
-    const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), PHP_DECIMAL_DECIMAL_FQCN, IS_OBJECT, 0, 0, 0},
-#endif
+    ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(PHP_DECIMAL_ARGINFO_NAME(cls, name), 0, required_num_args, Decimal\\Decimal, 0)
 
-#if PHP_VERSION_ID >= 70200
 #define PHP_DECIMAL_ARGINFO_RETURN_RATIONAL(cls, name, required_num_args) \
-    const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE_CLASS_CONST(PHP_DECIMAL_RATIONAL_FQCN, 0), 0, 0},
-#else
-#define PHP_DECIMAL_ARGINFO_RETURN_RATIONAL(cls, name, required_num_args) \
-    const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), PHP_DECIMAL_RATIONAL_FQCN, IS_OBJECT, 0, 0, 0},
-#endif
-/*
-#if PHP_VERSION_ID >= 70200
-#if PHP_VERSION_ID >= 70200
-#define PHP_DECIMAL_ARGINFO_RETURN_NUMBER(cls, name, required_num_args) \
-    static const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE_CLASS_CONST(PHP_DECIMAL_RATIONAL_FQCN, 0), 0, 0},
-#else
-#define PHP_DECIMAL_ARGINFO_RETURN_NUMBER(cls, name, required_num_args) \
-    static const zend_internal_arg_info PHP_DECIMAL_ARGINFO_NAME(cls, name)[] = { \
-        {(const char*)(zend_uintptr_t)(required_num_args), PHP_DECIMAL_RATIONAL_FQCN, IS_OBJECT, 0, 0, 0},
-#endif
-*/
-#if PHP_VERSION_ID >= 70200
+    ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(PHP_DECIMAL_ARGINFO_NAME(cls, name), 0, required_num_args, Decimal\\Rational, 0)
+
 #define PHP_DECIMAL_ARGINFO_RETURN_TYPE(cls, name, type, required_num_args) \
     ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(PHP_DECIMAL_ARGINFO_NAME(cls, name), 0, required_num_args, type, 0)
-#else
-#define PHP_DECIMAL_ARGINFO_RETURN_TYPE(cls, name, type, required_num_args) \
-    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(PHP_DECIMAL_ARGINFO_NAME(cls, name), 0, required_num_args, type, 0, 0)
-#endif
-
-
-
-/*
-#define PHP_DECIMAL_ARGINFO_RETURN_TYPE(cls, name, type, required_num_args) \
-    PHP_DECIMAL_ARGINFO_RETURN_TYPE_EX(cls, name, type, required_num_args)
-
-#define PHP_DECIMAL_FUNCTION_ARGINFO(name, required_num_args) \
-    PHP_DECIMAL_ARGINFO_EX(function, name, required_num_args)
-
-#define PHP_DECIMAL_FUNCTION_ARGINFO_RETURN_DECIMAL(name, required_num_args) \
-    PHP_DECIMAL_ARGINFO_RETURN_NUMBER(function, name, required_num_args)
-
-#define PHP_DECIMAL_FUNCTION_ARGINFO_RETURN_RATIONAL(name, required_num_args) \
-    PHP_DECIMAL_ARGINFO_RETURN_NUMBER(function, name, required_num_args)
-
-#define PHP_DECIMAL_FUNCTION_ARGINFO_RETURN_TYPE(name, type, required_num_args) \
-    PHP_DECIMAL_ARGINFO_RETURN_TYPE_EX(function, name, type, required_num_args)
-*/
 
 
 #define PHP_DECIMAL_ARGINFO_ZVAL(name) \

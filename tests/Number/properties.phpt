@@ -22,9 +22,10 @@ echo "Done";
 
 ?>
 --EXPECTF--
+Deprecated: Creation of dynamic property Number::$test is deprecated in %s on line %d
 int(5)
 
-Notice: Undefined property: Number::$test in %s on line %s
+Warning: Undefined property: Number::$test in %s on line %d
 NULL
 Cannot use object of type Number as array
 Done

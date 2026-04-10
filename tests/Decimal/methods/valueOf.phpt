@@ -138,10 +138,12 @@ A Failed to parse string as decimal: " 1"
 B Failed to parse string as decimal: "1 "
 C Decimal\Decimal::valueOf() expected parameter 1 to be a decimal number, string, or integer
 D Decimal\Decimal::valueOf() expected parameter 1 to be a decimal number, string, or integer
-E Argument 2 passed to Decimal\Decimal::valueOf() must be of the type in%s or null, string given
+E Decimal\Decimal::valueOf(): Argument #2 ($precision) must be of type int, string given
+
+Deprecated: Decimal\Decimal::valueOf(): Passing null to parameter #2 ($precision) of type ?int is deprecated in %s on line %d
 F Decimal precision out of range
 G Decimal precision out of range
 H Decimal precision out of range
 I Decimal precision out of range
-J Call to private method Decimal\Decimal::__construct() from context ''
-K Decimal\Decimal::valueOf() expects at least 1 parameter, 0 given
+J Call to private method Decimal\Decimal::__construct() from global scope
+K Decimal\Decimal::valueOf() expects at least 1 argument, 0 given
