@@ -270,6 +270,40 @@ static HashTable *php_decimal_get_debug_info_handler(zend_object *obj, int *is_t
 }
 
 /**
+ * Exposes value and precision for (array) cast, var_export, and debug.
+ */
+static HashTable *php_decimal_get_properties_for(zend_object *obj, zend_prop_purpose purpose)
+{
+    zval tmp;
+    HashTable *props;
+    php_decimal_t *dec = (php_decimal_t *) obj;
+
+    switch (purpose) {
+        case ZEND_PROP_PURPOSE_DEBUG:
+        case ZEND_PROP_PURPOSE_ARRAY_CAST:
+        case ZEND_PROP_PURPOSE_VAR_EXPORT:
+            break;
+        default:
+            return NULL;
+    }
+
+    ALLOC_HASHTABLE(props);
+    zend_hash_init(props, 2, NULL, ZVAL_PTR_DTOR, 0);
+
+    if (UNEXPECTED(!PHP_DECIMAL_OBJ_IS_INITIALIZED(dec))) {
+        return props;
+    }
+
+    ZVAL_STR(&tmp, php_decimal_mpd_to_string(PHP_DECIMAL_MPD(dec)));
+    zend_hash_str_update(props, "value", sizeof("value") - 1, &tmp);
+
+    ZVAL_LONG(&tmp, php_decimal_get_prec(dec));
+    zend_hash_str_update(props, "precision", sizeof("precision") - 1, &tmp);
+
+    return props;
+}
+
+/**
  * Cast to string, int, float or bool.
  */
 static php_decimal_success_t php_decimal_cast_object_handler(zend_object *obj, zval *result, int type)
@@ -751,7 +785,8 @@ PHP_DECIMAL_ARGINFO_END()
 PHP_DECIMAL_METHOD(Decimal, isPositive)
 {
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    RETURN_BOOL(mpd_ispositive(THIS_DECIMAL_MPD()));
+    mpd_t *mpd = THIS_DECIMAL_MPD();
+    RETURN_BOOL(!mpd_isnan(mpd) && !mpd_iszero(mpd) && mpd_ispositive(mpd));
 }
 
 /**
@@ -762,7 +797,8 @@ PHP_DECIMAL_ARGINFO_END()
 PHP_DECIMAL_METHOD(Decimal, isNegative)
 {
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    RETURN_BOOL(mpd_isnegative(THIS_DECIMAL_MPD()));
+    mpd_t *mpd = THIS_DECIMAL_MPD();
+    RETURN_BOOL(!mpd_isnan(mpd) && !mpd_iszero(mpd) && mpd_isnegative(mpd));
 }
 
 /**
@@ -1139,7 +1175,8 @@ void php_decimal_register_decimal_class()
     php_decimal_handlers.cast_object      = php_decimal_cast_object_handler;
     php_decimal_handlers.compare          = php_decimal_compare_handler;
     php_decimal_handlers.do_operation     = php_decimal_do_operation_handler;
-    php_decimal_handlers.get_debug_info   = php_decimal_get_debug_info_handler;
+    php_decimal_handlers.get_debug_info     = php_decimal_get_debug_info_handler;
+    php_decimal_handlers.get_properties_for = php_decimal_get_properties_for;
     php_decimal_handlers.read_property    = php_decimal_blocked_read_property;
     php_decimal_handlers.write_property   = php_decimal_blocked_write_property;
     php_decimal_handlers.has_property     = php_decimal_blocked_has_property;

@@ -65,7 +65,7 @@ $tests = [
     /**
      * ARRAY
      */
-    [(array) Rational::valueOf(0), []],
+    [(array) Rational::valueOf(0), ["num" => "0", "den" => "1"]],
 ];
 
 foreach ($tests as $test) {

@@ -65,7 +65,7 @@ $tests = [
     /**
      * ARRAY
      */
-    [(array) Decimal::valueOf(0), []],
+    [(array) Decimal::valueOf(0), ["value" => "0", "precision" => 34]],
 ];
 
 foreach ($tests as $test) {

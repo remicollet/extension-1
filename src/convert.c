@@ -142,7 +142,8 @@ zend_bool php_decimal_number_is_positive(const zval *obj)
 
 zend_bool php_decimal_number_is_negative(const zval *obj)
 {
-    return php_decimal_number_starts_with_minus(obj);
+    return php_decimal_number_starts_with_minus(obj)
+        && ! php_decimal_number_is_zero(obj);
 }
 
 void php_decimal_mpd_set_one(mpd_t *mpd)

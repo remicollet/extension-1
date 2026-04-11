@@ -21,7 +21,7 @@ $tests = [
     ["2",       false],
     ["3",       false],
 
-    ["-0",      true],
+    ["-0",      false],
     ["-1",      true],
     ["-2",      true],
     ["-3",      true],
@@ -47,10 +47,10 @@ foreach ($tests as $test) {
     printf("\n");
 }
 
-/* Test that a negative zero rounding has a negative result. */
+/* Test that a negative zero rounding is not negative (zero is neither positive nor negative). */
 var_dump(Number::valueOf("-0.05")->trunc()->isNegative());
 
 ?>
 --EXPECT--
 Number::toDecimal
-bool(true)
+bool(false)

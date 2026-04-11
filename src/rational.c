@@ -200,6 +200,41 @@ static HashTable *php_decimal_rational_get_debug_info(zend_object *obj, int *is_
 }
 
 /**
+ * Exposes num and den for (array) cast, var_export, and debug.
+ */
+static HashTable *php_decimal_rational_get_properties_for(zend_object *obj, zend_prop_purpose purpose)
+{
+    zval num;
+    zval den;
+    HashTable *props;
+    php_rational_t *rat = (php_rational_t *) obj;
+
+    switch (purpose) {
+        case ZEND_PROP_PURPOSE_DEBUG:
+        case ZEND_PROP_PURPOSE_ARRAY_CAST:
+        case ZEND_PROP_PURPOSE_VAR_EXPORT:
+            break;
+        default:
+            return NULL;
+    }
+
+    ALLOC_HASHTABLE(props);
+    zend_hash_init(props, 2, NULL, ZVAL_PTR_DTOR, 0);
+
+    if (UNEXPECTED(PHP_RATIONAL_NUM(rat)->data == NULL)) {
+        return props;
+    }
+
+    ZVAL_STR(&num, php_decimal_mpd_to_string(PHP_RATIONAL_NUM(rat)));
+    zend_hash_str_update(props, "num", sizeof("num") - 1, &num);
+
+    ZVAL_STR(&den, php_decimal_mpd_to_string(PHP_RATIONAL_DEN(rat)));
+    zend_hash_str_update(props, "den", sizeof("den") - 1, &den);
+
+    return props;
+}
+
+/**
  * Cast to string, int, float or bool.
  */
 static php_decimal_success_t php_decimal_rational_cast_object(zend_object *obj, zval *result, int type)
@@ -688,7 +723,8 @@ PHP_DECIMAL_ARGINFO_END()
 PHP_DECIMAL_METHOD(Rational, isPositive)
 {
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    RETURN_BOOL(mpd_ispositive(PHP_RATIONAL_NUM(THIS_RATIONAL())));
+    mpd_t *num = PHP_RATIONAL_NUM(THIS_RATIONAL());
+    RETURN_BOOL(!mpd_isnan(num) && !mpd_iszero(num) && mpd_ispositive(num));
 }
 
 /**
@@ -699,7 +735,8 @@ PHP_DECIMAL_ARGINFO_END()
 PHP_DECIMAL_METHOD(Rational, isNegative)
 {
     PHP_DECIMAL_PARSE_PARAMS_NONE();
-    RETURN_BOOL(mpd_isnegative(PHP_RATIONAL_NUM(THIS_RATIONAL())));
+    mpd_t *num = PHP_RATIONAL_NUM(THIS_RATIONAL());
+    RETURN_BOOL(!mpd_isnan(num) && !mpd_iszero(num) && mpd_isnegative(num));
 }
 
 /**
@@ -1065,7 +1102,8 @@ void php_decimal_register_rational_class()
     php_decimal_rational_handlers.cast_object      = php_decimal_rational_cast_object;
     php_decimal_rational_handlers.compare          = php_decimal_rational_compare_handler;
     php_decimal_rational_handlers.do_operation     = php_decimal_rational_do_operation;
-    php_decimal_rational_handlers.get_debug_info   = php_decimal_rational_get_debug_info;
+    php_decimal_rational_handlers.get_debug_info     = php_decimal_rational_get_debug_info;
+    php_decimal_rational_handlers.get_properties_for = php_decimal_rational_get_properties_for;
     php_decimal_rational_handlers.read_property    = php_decimal_blocked_read_property;
     php_decimal_rational_handlers.write_property   = php_decimal_blocked_write_property;
     php_decimal_rational_handlers.has_property     = php_decimal_blocked_has_property;

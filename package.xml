@@ -3,22 +3,22 @@
     <name>decimal</name>
     <channel>pecl.php.net</channel>
     <summary>Arbitrary precision floating-point decimal</summary>
-    <description>Correctly-rounded arbitrary precision decimal floating-point arithmetic in PHP 7</description>
+    <description>Correctly-rounded arbitrary precision decimal floating-point arithmetic in PHP</description>
     <lead>
         <name>Rudi Theunissen</name>
         <user>rtheunissen</user>
         <email>rtheunissen@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2020-02-03</date>
-    <time>13:24:32</time>
+    <date>2026-04-09</date>
+    <time>00:00:00</time>
     <version>
         <release>2.0.0</release>
         <api>2.0.0</api>
     </version>
     <stability>
-        <release>alpha</release>
-        <api>alpha</api>
+        <release>stable</release>
+        <api>stable</api>
     </stability>
     <license uri="https://opensource.org/licenses/MIT">MIT License</license>
     <notes>
@@ -28,6 +28,9 @@
         - Added `Decimal\Number` abstract class.
         - Performance improvements, reduced object allocations.
         - Private constructors, static initializers via `valueOf`.
+        - PHP 8.2+ compatibility.
+        - Fixed isPositive/isNegative to return false for zero values.
+        - Fixed array/debug output for Decimal and Rational objects.
     </notes>
     <contents>
         <dir name="/">
@@ -200,7 +203,7 @@
     <dependencies>
         <required>
             <php>
-                <min>7.2.0</min>
+                <min>8.2.0</min>
             </php>
             <pearinstaller>
                 <min>1.4.0b1</min>
