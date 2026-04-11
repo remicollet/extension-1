@@ -84,12 +84,12 @@ class Number extends \Decimal\Number
         return new static($this->value / (10 ** $places));
     }
 
-    public function round(int $places = NULL, int $mode = NULL): \Decimal\Number
+    public function round(?int $places = NULL, ?int $mode = NULL): \Decimal\Number
     {
         return new static($this->toDecimal(\Decimal\Decimal::MAX_PRECISION)->round($places, $mode)->toString());
     }
 
-    public function toFixed(int $places = NULL, bool $commas = NULL, int $mode = NULL): string
+    public function toFixed(?int $places = NULL, ?bool $commas = NULL, ?int $mode = NULL): string
     {
         return new static($this->toDecimal(\Decimal\Decimal::MAX_PRECISION)->toFixed($places, $commas, $mode));
     }

@@ -68,8 +68,8 @@ static php_decimal_t *php_decimal_alloc()
 
     // TODO we should still go through everything to check for branch prediction.
     if (obj) {
-        obj->std.handlers = &php_decimal_handlers;
         zend_object_std_init((zend_object *) obj, php_decimal_decimal_ce);
+        obj->std.handlers = &php_decimal_handlers;
     } else {
         php_decimal_memory_error();
     }

@@ -9,7 +9,7 @@ var_dump(json_encode(Number::valueOf("0.3")));
 /**
  * Test that we can override the internal alias.
  */
-class Override extends Number
+class CustomNumber extends Number
 {
     public function jsonSerialize(): string
     {
@@ -17,7 +17,7 @@ class Override extends Number
     }
 }
 
-var_dump(json_encode(Override::valueOf(5)));
+var_dump(json_encode(CustomNumber::valueOf(5)));
 
 ?>
 --EXPECT--

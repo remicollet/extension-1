@@ -69,8 +69,8 @@ static php_rational_t *php_decimal_rational_alloc()
     php_rational_t *obj = ecalloc(1, sizeof(php_rational_t));
 
     if (EXPECTED(obj)) {
-        obj->std.handlers = &php_decimal_rational_handlers;
         zend_object_std_init((zend_object *) obj, php_decimal_rational_ce);
+        obj->std.handlers = &php_decimal_rational_handlers;
     } else {
         php_decimal_memory_error();
     }
