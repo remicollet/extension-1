@@ -883,12 +883,12 @@ PHP_DECIMAL_METHOD(Decimal, toString)
 }
 
 /**
- * Decimal::toSci
+ * Decimal::toScientific
  */
-PHP_DECIMAL_ARGINFO_RETURN_TYPE(Decimal, toSci, IS_STRING, 0)
+PHP_DECIMAL_ARGINFO_RETURN_TYPE(Decimal, toScientific, IS_STRING, 0)
 PHP_DECIMAL_ARGINFO_OPTIONAL_LONG(precision)
 PHP_DECIMAL_ARGINFO_END()
-PHP_DECIMAL_METHOD(Decimal, toSci)
+PHP_DECIMAL_METHOD(Decimal, toScientific)
 {
     PHP_DECIMAL_PARSE_PARAMS_NONE();
     RETURN_STR(php_decimal_mpd_to_sci(THIS_DECIMAL_MPD()));
@@ -1124,7 +1124,7 @@ static zend_function_entry decimal_methods[] = {
 
     PHP_DECIMAL_ME(Decimal, toString)
     PHP_DECIMAL_ME(Decimal, toFixed)
-    PHP_DECIMAL_ME(Decimal, toSci)
+    PHP_DECIMAL_ME(Decimal, toScientific)
     PHP_DECIMAL_ME(Decimal, toInt)
     PHP_DECIMAL_ME(Decimal, toFloat)
     PHP_DECIMAL_ME(Decimal, toDecimal)

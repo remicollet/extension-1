@@ -1,5 +1,5 @@
 --TEST--
-Decimal::toString
+Decimal::toScientific
 --FILE--
 <?php
 use Decimal\Decimal;
@@ -85,7 +85,7 @@ $tests = [
 foreach ($tests as $test) {
     $number = $test[0];
     $expect = $test[1];
-    $result = Decimal::valueOf($number)->toSci();
+    $result = Decimal::valueOf($number)->toScientific();
 
     if ($result !== $expect) {
         print_r(compact("number", "result", "expect"));

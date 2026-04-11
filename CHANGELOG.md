@@ -2,19 +2,23 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](http://semver.org/).
 
-## [2.0.0] - 2020-02-03
+## [2.0.0] - 2026-04-11
 - Default decimal precision changed from 28 to 34 to match [Decimal128](https://en.wikipedia.org/wiki/Decimal128_floating-point_format).
 - Decimal operations now use the **minimum** precision of all operands, rather than the maximum.
-- Remove `Decimal\Decimal::equals` method.
 - Added `Decimal\Rational` implementation for rational numbers (fractions).
 - Added `Decimal\Number` abstract number class.
 - Added `Decimal\Precision` interface.
 - Added `Decimal\Decimal::reduce` method.
+- Renamed `toSci` to `toScientific`.
 - Remove `signum` methods.
 - Remove `parity` methods.
 - Better consistency around scientific notation when converting to string or JSON.
 - Precision is now applied on operations only (input is preserved).
 - Decimal constructors are now private - must use `\Decimal\Number::valueOf`.
+- Performance improvements, reduced object allocations.
+- PHP 8.2, 8.3, and 8.4 compatibility.
+- Fixed `isPositive`/`isNegative` to return false for zero values.
+- Fixed array/debug output for Decimal and Rational objects.
 
 ## [1.3.0] - 2019-02-11
 - Fixed sqrt of -INF returning -INF rather than NAN. #13

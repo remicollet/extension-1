@@ -10,7 +10,7 @@
         <email>rtheunissen@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2026-04-09</date>
+    <date>2026-04-11</date>
     <time>00:00:00</time>
     <version>
         <release>2.0.0</release>
@@ -28,15 +28,17 @@
         - Added `Decimal\Number` abstract class.
         - Performance improvements, reduced object allocations.
         - Private constructors, static initializers via `valueOf`.
-        - PHP 8.2+ compatibility.
+        - PHP 8.2, 8.3, and 8.4 compatibility.
         - Fixed isPositive/isNegative to return false for zero values.
         - Fixed array/debug output for Decimal and Rational objects.
+        - Renamed `toSci` to `toScientific`.
     </notes>
     <contents>
         <dir name="/">
             <file role="doc" name="LICENSE"/>
             <file role="doc" name="CHANGELOG.md"/>
             <file role="doc" name="README.md"/>
+            <file role="doc" name="composer.json"/>
 
             <file role="src" name="config.m4"/>
             <file role="src" name="config.w32"/>
@@ -76,6 +78,8 @@
             </dir>
 
             <dir name="tests">
+                <file role="test" name="opcache.phpt"/>
+
                 <dir name="Decimal">
                     <file role="test" name="cast.phpt"/>
                     <file role="test" name="clone.phpt"/>
@@ -84,22 +88,27 @@
                     <file role="test" name="json.phpt"/>
                     <file role="test" name="operators.phpt"/>
                     <file role="test" name="properties.phpt"/>
+                    <file role="test" name="refcount.phpt"/>
                     <file role="test" name="serialize.phpt"/>
 
                     <dir name="methods">
                         <file role="test" name="__construct.phpt"/>
                         <file role="test" name="abs.phpt"/>
                         <file role="test" name="add.phpt"/>
+                        <file role="test" name="between.phpt"/>
                         <file role="test" name="ceil.phpt"/>
                         <file role="test" name="compareTo.phpt"/>
                         <file role="test" name="div.phpt"/>
+                        <file role="test" name="equals.phpt"/>
                         <file role="test" name="exp.phpt"/>
                         <file role="test" name="floor.phpt"/>
                         <file role="test" name="isEven.phpt"/>
                         <file role="test" name="isInf.phpt"/>
                         <file role="test" name="isInteger.phpt"/>
                         <file role="test" name="isNaN.phpt"/>
+                        <file role="test" name="isNegative.phpt"/>
                         <file role="test" name="isOdd.phpt"/>
+                        <file role="test" name="isPositive.phpt"/>
                         <file role="test" name="isZero.phpt"/>
                         <file role="test" name="ln.phpt"/>
                         <file role="test" name="log10.phpt"/>
@@ -120,6 +129,7 @@
                         <file role="test" name="toFloat.phpt"/>
                         <file role="test" name="toInt.phpt"/>
                         <file role="test" name="toRational.phpt"/>
+                        <file role="test" name="toScientific.phpt"/>
                         <file role="test" name="toString.phpt"/>
                         <file role="test" name="trim.phpt"/>
                         <file role="test" name="trunc.phpt"/>
@@ -137,16 +147,33 @@
                     <file role="test" name="properties.phpt"/>
 
                     <dir name="methods">
+                        <file role="test" name="abs.phpt"/>
                         <file role="test" name="add.phpt"/>
+                        <file role="test" name="between.phpt"/>
+                        <file role="test" name="ceil.phpt"/>
                         <file role="test" name="compareTo.phpt"/>
                         <file role="test" name="div.phpt"/>
+                        <file role="test" name="equals.phpt"/>
+                        <file role="test" name="floor.phpt"/>
+                        <file role="test" name="isEven.phpt"/>
+                        <file role="test" name="isInf.phpt"/>
+                        <file role="test" name="isInteger.phpt"/>
+                        <file role="test" name="isNan.phpt"/>
+                        <file role="test" name="isNegative.phpt"/>
+                        <file role="test" name="isOdd.phpt"/>
+                        <file role="test" name="isPositive.phpt"/>
+                        <file role="test" name="isZero.phpt"/>
                         <file role="test" name="mod.phpt"/>
                         <file role="test" name="mul.phpt"/>
+                        <file role="test" name="negate.phpt"/>
                         <file role="test" name="pow.phpt"/>
                         <file role="test" name="shiftl.phpt"/>
                         <file role="test" name="shiftr.phpt"/>
                         <file role="test" name="sub.phpt"/>
+                        <file role="test" name="toDecimal.phpt"/>
+                        <file role="test" name="toRational.phpt"/>
                         <file role="test" name="toString.phpt"/>
+                        <file role="test" name="trunc.phpt"/>
                         <file role="test" name="valueOf.phpt"/>
                     </dir>
 
@@ -163,21 +190,26 @@
                     <file role="test" name="json.phpt"/>
                     <file role="test" name="operators.phpt"/>
                     <file role="test" name="properties.phpt"/>
+                    <file role="test" name="refcount.phpt"/>
                     <file role="test" name="serialize.phpt"/>
 
                     <dir name="methods">
                         <file role="test" name="__construct.phpt"/>
                         <file role="test" name="abs.phpt"/>
                         <file role="test" name="add.phpt"/>
+                        <file role="test" name="between.phpt"/>
                         <file role="test" name="ceil.phpt"/>
                         <file role="test" name="compareTo.phpt"/>
                         <file role="test" name="div.phpt"/>
+                        <file role="test" name="equals.phpt"/>
                         <file role="test" name="floor.phpt"/>
                         <file role="test" name="isEven.phpt"/>
                         <file role="test" name="isInf.phpt"/>
                         <file role="test" name="isInteger.phpt"/>
                         <file role="test" name="isNaN.phpt"/>
+                        <file role="test" name="isNegative.phpt"/>
                         <file role="test" name="isOdd.phpt"/>
+                        <file role="test" name="isPositive.phpt"/>
                         <file role="test" name="isZero.phpt"/>
                         <file role="test" name="mod.phpt"/>
                         <file role="test" name="mul.phpt"/>
@@ -193,7 +225,9 @@
                         <file role="test" name="toFloat.phpt"/>
                         <file role="test" name="toInt.phpt"/>
                         <file role="test" name="toRational.phpt"/>
+                        <file role="test" name="toScientific.phpt"/>
                         <file role="test" name="toString.phpt"/>
+                        <file role="test" name="trunc.phpt"/>
                         <file role="test" name="valueOf.phpt"/>
                     </dir>
                 </dir>

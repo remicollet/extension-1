@@ -808,12 +808,12 @@ PHP_DECIMAL_METHOD(Rational, toFixed)
 }
 
 /**
- * Rational::toSci
+ * Rational::toScientific
  */
-PHP_DECIMAL_ARGINFO_RETURN_TYPE(Rational, toSci, IS_STRING, 0)
+PHP_DECIMAL_ARGINFO_RETURN_TYPE(Rational, toScientific, IS_STRING, 0)
 PHP_DECIMAL_ARGINFO_OPTIONAL_LONG(precision)
 PHP_DECIMAL_ARGINFO_END()
-PHP_DECIMAL_METHOD(Rational, toSci)
+PHP_DECIMAL_METHOD(Rational, toScientific)
 {
     zend_long prec = PHP_DECIMAL_DEFAULT_PREC;
 
@@ -1050,7 +1050,7 @@ static zend_function_entry rational_methods[] = {
     PHP_DECIMAL_ME(Rational, isZero)
 
     PHP_DECIMAL_ME(Rational, toFixed)
-    PHP_DECIMAL_ME(Rational, toSci)
+    PHP_DECIMAL_ME(Rational, toScientific)
     PHP_DECIMAL_ME(Rational, toString)
     PHP_DECIMAL_ME(Rational, toInt)
     PHP_DECIMAL_ME(Rational, toFloat)
