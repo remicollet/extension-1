@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](http://semver.org/).
 
-## [2.0.0] - 2026-04-11
+## [2.0.1] - 2026-04-11
 - Default decimal precision changed from 28 to 34 to match [Decimal128](https://en.wikipedia.org/wiki/Decimal128_floating-point_format).
 - Decimal operations now use the **minimum** precision of all operands, rather than the maximum.
 - Added `Decimal\Rational` implementation for rational numbers (fractions).
