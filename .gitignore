@@ -13,6 +13,7 @@
 *~
 .#*
 .deps
+*.dep
 .idea
 .libs
 /include

@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} (${{ matrix.platform }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.2', platform: debian,  dockerfile: Dockerfile }
+          - { php: '8.2', platform: alpine,  dockerfile: Dockerfile.alpine }
+          - { php: '8.3', platform: debian,  dockerfile: Dockerfile }
+          - { php: '8.3', platform: alpine,  dockerfile: Dockerfile.alpine }
+          - { php: '8.4', platform: debian,  dockerfile: Dockerfile }
+          - { php: '8.4', platform: alpine,  dockerfile: Dockerfile.alpine }
+          - { php: '8.5', platform: debian,  dockerfile: Dockerfile,        tag: '8.5-rc' }
+          - { php: '8.5', platform: alpine,  dockerfile: Dockerfile.alpine, tag: '8.5-rc' }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: docker build -f ${{ matrix.dockerfile }} --build-arg PHP_VERSION=${{ matrix.tag || matrix.php }} -t ext-decimal .
+
+      - name: Test
+        run: docker run --rm ext-decimal

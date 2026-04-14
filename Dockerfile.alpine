@@ -1,9 +1,12 @@
 ARG PHP_VERSION=8.4
-FROM php:${PHP_VERSION}-cli
+FROM php:${PHP_VERSION}-cli-alpine
 
-RUN apt-get update && apt-get install -y \
-    libmpdec-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    mpdecimal-dev \
+    gcc \
+    make \
+    autoconf \
+    libc-dev
 
 WORKDIR /ext-decimal
 
